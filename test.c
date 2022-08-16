@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#define BALLS 3
+#define BALLS 1500
 #define ballRadius 10
 #define SPEED 10
 
@@ -15,15 +15,15 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "hot and sweaty");
 
-	// Vector2 Positions[BALLS];
-	// Vector2 Velocities[BALLS];
-	// for (int i=0; i < BALLS; i++) {
-	// 	Positions[i] = (Vector2){(rand() % screenWidth - ballRadius) + ballRadius*2, (rand() % screenHeight-ballRadius) + ballRadius*2};
-	// 	Velocities[i] = (Vector2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
-	// }
+	Vector2 Positions[BALLS];
+	Vector2 Velocities[BALLS];
+	for (int i=0; i < BALLS; i++) {
+		Positions[i] = (Vector2){(rand() % screenWidth - ballRadius) + ballRadius*2, (rand() % screenHeight-ballRadius) + ballRadius*2};
+		Velocities[i] = (Vector2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
+	}
 
-	Vector2 Positions[BALLS] = {{100, 118}, {150, 100}, {700, 100}};
-	Vector2 Velocities[BALLS] = {{3, 0}, {0, 0}, {0, 0}};
+	// Vector2 Positions[BALLS] = {{50, 250}, {400, 250}, {700, 100}};
+	// Vector2 Velocities[BALLS] = {{3, 3}, {0, 0}, {0, 0}};
 
     SetTargetFPS(60);
 
@@ -56,7 +56,7 @@ int main(void)
 			}
 
 			for (int j=i+1; j < BALLS; j++){
-				if (sqrt(pow(Positions[i].x - Positions[j].x, 2) + pow(Positions[i].y - Positions[j].y, 2)) <= 2 * ballRadius) {
+				if (sqrtf(powf(Positions[i].x - Positions[j].x, 2) + powf(Positions[i].y - Positions[j].y, 2)) <= 2 * ballRadius) {
 					
 					//manual calculation of non-head on elastic collisions 
 					// float dPx = Positions[i].x - Positions[j].x;
@@ -64,7 +64,7 @@ int main(void)
 					// float dVx = Velocities[i].x - Velocities[j].x;
 					// float dVy = Velocities[i].y - Velocities[j].y;
 					// // float norm = abs(pow(dPx) + pow(dPy, 2));
-					// float norm = abs(pow(dPx, 2) + pow(dPy, 2));
+					// float norm = fabsf(pow(dPx, 2) + pow(dPy, 2));
 					// float dot = dVx * dPx + dVy * dPy;
 
 					// Velocities[i].x = Velocities[i].x - ((dot/norm) * dPx); 
@@ -81,26 +81,54 @@ int main(void)
 					Velocities[j] = Vector2Subtract(Velocities[j], Vector2Scale(Vector2Subtract(Positions[i], Positions[j]), -dot/normSquared));
 
 
-					// // moves balls out of each other, stops them from becoming stuck inside each other
+					Vector2 dP = Vector2Scale(Vector2Scale(Vector2Subtract(Positions[i], Positions[j]), 
+					1 / (Vector2Length(Vector2Subtract(Positions[i], Positions[j])))), 
+					(2 * ballRadius - Vector2Length(Vector2Subtract(Positions[i], Positions[j]))));
+					dP.x = fabs(dP.x);
+					dP.y = fabs(dP.y);
 
-					float dist = Vector2Distance(Positions[i], Positions[j]);
+					if (Positions[i].x  > Positions[j].x) {
+						Positions[i].x += dP.x/2;
+						Positions[j].x -= dP.x/2;
+					}
+					else if (Positions[i].x < Positions[j].x) {
+						 Positions[i].x -= dP.x/2;
+						 Positions[j].x +=  dP.x/2;
+					}
 
-					if (Positions[i].x < Positions[j].x) {
-						 Positions[i].x -= abs(ballRadius - dist/2);
-						 Positions[j].x += abs(ballRadius - dist/2);
-					}
-					if (Positions[i].y < Positions[j].y) {
-						 Positions[i].y -= abs(ballRadius - dist/2);
-						 Positions[j].y += abs(ballRadius - dist/2);
-					}
-					if (Positions[i].x > Positions[j].x) {
-						 Positions[i].x += abs(ballRadius - dist/2);
-						 Positions[j].x -= abs(ballRadius - dist/2);
-					}
 					if (Positions[i].y > Positions[j].y) {
-						 Positions[i].y += abs(ballRadius - dist/2);
-						 Positions[j].y -= abs(ballRadius - dist/2);
+						 Positions[i].y += dP.y/2;
+						 Positions[j].y -= dP.y/2;
 					}
+					else if (Positions[i].y < Positions[j].y) {
+						 Positions[i].y -= dP.y/2;
+						 Positions[j].y += dP.y/2;
+					}
+
+
+
+
+
+					// // moves balls out of each other, stops them from becoming stuck inside each other
+					// float dist_x = fabsf(Positions[i].x - Positions[j].x)/2;
+					// float dist_y = fabsf(Positions[i].y - Positions[j].y)/2;
+
+					// if (Positions[i].x < Positions[j].x) {
+					// 	 Positions[i].x -= abs(ballRadius - dist_x);
+					// 	 Positions[j].x += abs(ballRadius - dist_x);
+					// }
+					// if (Positions[i].y < Positions[j].y) {
+					// 	 Positions[i].y -= abs(ballRadius - dist_y);
+					// 	 Positions[j].y += abs(ballRadius - dist_y);
+					// }
+					// if (Positions[i].x > Positions[j].x) {
+					// 	 Positions[i].x += abs(ballRadius - dist_x);
+					// 	 Positions[j].x -= abs(ballRadius - dist_x);
+					// }
+					// if (Positions[i].y > Positions[j].y) {
+					// 	 Positions[i].y += abs(ballRadius - dist_y);
+					// 	 Positions[j].y -= abs(ballRadius - dist_y);
+					// }
 
 				}
 			}
@@ -112,14 +140,18 @@ int main(void)
             ClearBackground(RAYWHITE);
 
 			// DrawCircleV(ballPosition, ballRadius * 2, RED);
-			double momentum = 0;
+			float momentum = 0;
+			float tot_x = 0;
+			float tot_y = 0;
 			for (int i=0; i < BALLS; i++) {
 				if (i % 50 == 0) DrawCircleV(Positions[i], ballRadius, BLUE);
 				else DrawCircleV(Positions[i], ballRadius, RED);
-				momentum += sqrt(pow(Velocities[i].x, 2) + pow(Velocities[i].y, 2));
+				tot_x += powf(Velocities[i].x, 2);
+				tot_y += powf(Velocities[i].y, 2);
 			}
+			momentum = sqrtf(tot_x + tot_y);
+			DrawText(TextFormat("%.10f", momentum), 20, 20, 100, BLACK);
 
-			DrawText(TextFormat("%lf", momentum), 20, 20, 100, LIGHTGRAY);
 
 		EndDrawing();
     }
