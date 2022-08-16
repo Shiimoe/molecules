@@ -57,22 +57,6 @@ int main(void)
 
 			for (int j=i+1; j < BALLS; j++){
 				if (sqrtf(powf(Positions[i].x - Positions[j].x, 2) + powf(Positions[i].y - Positions[j].y, 2)) <= 2 * ballRadius) {
-					
-					//manual calculation of non-head on elastic collisions 
-					// float dPx = Positions[i].x - Positions[j].x;
-					// float dPy = Positions[i].y - Positions[j].y;
-					// float dVx = Velocities[i].x - Velocities[j].x;
-					// float dVy = Velocities[i].y - Velocities[j].y;
-					// // float norm = abs(pow(dPx) + pow(dPy, 2));
-					// float norm = fabsf(pow(dPx, 2) + pow(dPy, 2));
-					// float dot = dVx * dPx + dVy * dPy;
-
-					// Velocities[i].x = Velocities[i].x - ((dot/norm) * dPx); 
-					// Velocities[i].y = Velocities[i].y - ((dot/norm) * dPy); 
-
-					// Velocities[j].x = Velocities[j].x + ((dot/norm) * dPx);
-					// Velocities[j].y = Velocities[j].y + ((dot/norm) * dPy); 
-					///////////////////////////////////////////////////////
 
 					float dot = Vector2DotProduct(Vector2Subtract(Velocities[i], Velocities[j]), Vector2Subtract(Positions[i], Positions[j]));
 					float normSquared = Vector2LengthSqr(Vector2Subtract(Positions[i], Positions[j]));
@@ -104,32 +88,6 @@ int main(void)
 						 Positions[i].y -= dP.y/2;
 						 Positions[j].y += dP.y/2;
 					}
-
-
-
-
-
-					// // moves balls out of each other, stops them from becoming stuck inside each other
-					// float dist_x = fabsf(Positions[i].x - Positions[j].x)/2;
-					// float dist_y = fabsf(Positions[i].y - Positions[j].y)/2;
-
-					// if (Positions[i].x < Positions[j].x) {
-					// 	 Positions[i].x -= abs(ballRadius - dist_x);
-					// 	 Positions[j].x += abs(ballRadius - dist_x);
-					// }
-					// if (Positions[i].y < Positions[j].y) {
-					// 	 Positions[i].y -= abs(ballRadius - dist_y);
-					// 	 Positions[j].y += abs(ballRadius - dist_y);
-					// }
-					// if (Positions[i].x > Positions[j].x) {
-					// 	 Positions[i].x += abs(ballRadius - dist_x);
-					// 	 Positions[j].x -= abs(ballRadius - dist_x);
-					// }
-					// if (Positions[i].y > Positions[j].y) {
-					// 	 Positions[i].y += abs(ballRadius - dist_y);
-					// 	 Positions[j].y -= abs(ballRadius - dist_y);
-					// }
-
 				}
 			}
 
