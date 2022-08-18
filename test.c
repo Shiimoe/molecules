@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #define BALLS 500
@@ -121,7 +120,7 @@ int main(void)
 			}
 			
 			for (int i = 0; i < POPULATION_SIZE; i++) {
-				DrawLineEx((Vector2){10 + (i*10), screenHeight-50}, (Vector2){10 + (i*10), (screenHeight - 60 - (population[i] * 10 / log(BALLS)))}, 5, BLACK);
+				DrawLineEx((Vector2){10 + (i*10), screenHeight-10}, (Vector2){10 + (i*10), (screenHeight - 12 - (population[i] * 20 / log(BALLS)))}, 5, BLACK);
 				population[i] = 0;
 			}
 			momentum = sqrtf(tot_x + tot_y);
