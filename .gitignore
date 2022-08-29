@@ -1,3 +1,5 @@
 *.o
 *.out
 main
+test.c
+test

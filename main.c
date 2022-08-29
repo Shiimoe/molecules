@@ -11,48 +11,59 @@
 #define vec2dot Vector2DotProduct
 #define scrnH 600
 #define scrnW 800
-
-// Maybe make some enum int global variables?
+#define colour Color
 
 enum {
-	BALLS = 150,
 	ballRadius = 8,
-	SPEED = 10,
+	SPEED = 13,
 	POPULATION_SIZE = (SPEED + 10),
 };
 
 
-void randBalls(vec2 Positions[], vec2 Velocities[]) {
+void randBalls(vec2 **Positions, vec2 **Velocities, int BALLS) {
+	free(*Positions);
+	free(*Velocities);
+
+	*Positions = calloc(BALLS, sizeof(Vector2));
+	*Velocities = calloc(BALLS, sizeof(Vector2));	
+  
 	for (int i=0; i < BALLS; i++) {
-		Positions[i] = (vec2){(rand() % scrnW - ballRadius) + ballRadius*2, (rand() % scrnH-ballRadius) + ballRadius*2};
-		Velocities[i] = (vec2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
+		(*Positions)[i] = (vec2){(rand() % scrnW - ballRadius) + ballRadius*2, (rand() % scrnH-ballRadius) + ballRadius*2};
+		(*Velocities)[i] = (vec2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
 	}
 }
-
+int BALLS = 200;
+bool edit = false;
+colour BALL_COLOUR = RED;
 
 int main(void)
 {
-    //const int screenWidth = 800;
-    //const int screenHeight = 600;
 
-    InitWindow(scrnW, scrnH, "hot and sweaty");
-
-	vec2 Positions[BALLS];
-	vec2 Velocities[BALLS];
-	randBalls(Positions, Velocities);
+	vec2 *Positions = NULL;
+	vec2 *Velocities = NULL;
+	
+	InitWindow(scrnW, scrnH, "hot and sweaty");
+	randBalls(&Positions, &Velocities, BALLS);
+	SetTargetFPS(60);
+	
+	
 
 	// vec2 Positions[BALLS] = {{600, 600}, {300, 600}, {900, 600}, {600, 900}, {600, 300}, {900, 900}, {300, 300}, {300, 900}, {900,300}};
 	// vec2 Velocities[BALLS] = {{10, 0}, {2, 0}, {-2, 0}, {0, -2}, {0, 2}, {-2, -2}, {2, 2}, {2, -2}, {-2, 2}};
 
-    SetTargetFPS(60);
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
 		// Updating variables
 
-		if (IsKeyDown(KEY_R)) randBalls(Positions, Velocities);  
-
+		if (IsKeyPressed(KEY_R)) randBalls(&Positions, &Velocities, BALLS);  
+		if (IsKeyPressed(KEY_LEFT_SHIFT)) edit = !edit;
+		if (edit == true) { 
+			BALL_COLOUR = BLUE;
+		} 
+		if (edit == false) BALL_COLOUR = RED;
+		
 		for (int i=0; i < BALLS; i++) {
 			vec2 position = Positions[i];
 			vec2 velocity = Velocities[i];
@@ -130,7 +141,7 @@ int main(void)
 			float tot_y = 0;
 			for (int i=0; i < BALLS; i++) {
 				if (i % 50 == 0) DrawCircleV(Positions[i], ballRadius, BLUE);
-				else DrawCircleV(Positions[i], ballRadius, RED);
+				else DrawCircleV(Positions[i], ballRadius, BALL_COLOUR);
 				tot_x += powf(Velocities[i].x, 2);
 				tot_y += powf(Velocities[i].y, 2);
 				for (int j = 0; j < POPULATION_SIZE; j += 1) {
