@@ -9,8 +9,8 @@
 #define vec2lensqr Vector2LengthSqr
 #define vec2 Vector2
 #define vec2dot Vector2DotProduct
-#define scrnH 600
-#define scrnW 800
+#define scrnH 800
+#define scrnW 1200
 #define colour Color
 
 enum {
@@ -20,33 +20,50 @@ enum {
 };
 
 
-void randBalls(vec2 **Positions, vec2 **Velocities, int BALLS) {
+void randBalls(vec2 **Positions, vec2 **Velocities, int BALLS, int *size) {
 	free(*Positions);
 	free(*Velocities);
 
-	*Positions = calloc(BALLS, sizeof(Vector2));
-	*Velocities = calloc(BALLS, sizeof(Vector2));	
-  
+	*Positions = calloc(*size * 1.5, sizeof(Vector2));
+	*Velocities = calloc(*size * 1.5, sizeof(Vector2));
+	*size = *size * 1.5;
+
 	for (int i=0; i < BALLS; i++) {
 		(*Positions)[i] = (vec2){(rand() % scrnW - ballRadius) + ballRadius*2, (rand() % scrnH-ballRadius) + ballRadius*2};
 		(*Velocities)[i] = (vec2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
 	}
 }
-int BALLS = 200;
-bool edit = false;
-colour BALL_COLOUR = RED;
+
+void addBall(vec2 **Positions, vec2 **Velocities, int *BALLS, int *size) {
+	if (*BALLS >= *size) {
+		printf("init size: %d\n", *size);
+		*Positions = realloc(*Positions, (int)(*size * 1.5 * 8));
+		*Velocities = realloc(*Velocities, (int)(*size * 1.5 * 8));
+		*size = *size * 1.5;
+		printf("final size: %d\n", *size);
+	}
+	(*Positions)[*BALLS] = (vec2){(rand() % scrnW - ballRadius) + ballRadius*2, (rand() % scrnH-ballRadius) + ballRadius*2};
+	(*Velocities)[*BALLS] = (vec2){(rand() % SPEED) - (rand() % SPEED), (rand() % SPEED) - (rand() % SPEED)};
+	*BALLS += 1;
+	printf("balls: %d\n", *BALLS);
+}
 
 int main(void)
 {
+	int BALLS = 4;
+	int size;
+	size = BALLS;
+	bool edit = false;
+	colour BALL_COLOUR = RED;
 
 	vec2 *Positions = NULL;
 	vec2 *Velocities = NULL;
-	
+
 	InitWindow(scrnW, scrnH, "hot and sweaty");
-	randBalls(&Positions, &Velocities, BALLS);
+	randBalls(&Positions, &Velocities, BALLS, &size);
 	SetTargetFPS(60);
-	
-	
+
+
 
 	// vec2 Positions[BALLS] = {{600, 600}, {300, 600}, {900, 600}, {600, 900}, {600, 300}, {900, 900}, {300, 300}, {300, 900}, {900,300}};
 	// vec2 Velocities[BALLS] = {{10, 0}, {2, 0}, {-2, 0}, {0, -2}, {0, 2}, {-2, -2}, {2, 2}, {2, -2}, {-2, 2}};
@@ -57,13 +74,16 @@ int main(void)
     {
 		// Updating variables
 
-		if (IsKeyPressed(KEY_R)) randBalls(&Positions, &Velocities, BALLS);  
+		if (IsKeyPressed(KEY_R)) randBalls(&Positions, &Velocities, BALLS, &size);
 		if (IsKeyPressed(KEY_LEFT_SHIFT)) edit = !edit;
-		if (edit == true) { 
+		if (edit == true) {
 			BALL_COLOUR = BLUE;
-		} 
+			if (IsKeyDown(KEY_A)) {
+				addBall(&Positions, &Velocities, &BALLS, &size);
+			}
+		}
 		if (edit == false) BALL_COLOUR = RED;
-		
+
 		for (int i=0; i < BALLS; i++) {
 			vec2 position = Positions[i];
 			vec2 velocity = Velocities[i];
@@ -90,8 +110,8 @@ int main(void)
 
 			for (int j=i+1; j < BALLS; j++){
 				if (sqrtf(powf(Positions[i].x - Positions[j].x, 2) + powf(Positions[i].y - Positions[j].y, 2)) <= 2 * ballRadius) {
-					// moving molecules so they don't overlap on collision 
-					
+					// moving molecules so they don't overlap on collision
+
 					float ratio = vec2len(Velocities[i])/(vec2len(Velocities[i]) + vec2len(Velocities[j]));
 
 					vec2 diff_ij = vec2sub(Positions[i], Positions[j]);
@@ -117,8 +137,8 @@ int main(void)
 						 Positions[i].y -= dP.y * ratio;
 						 Positions[j].y += dP.y * (1 - ratio);
 					}
-					
-					
+
+
 					// calculating new velocity
 					float dot = vec2dot(vec2sub(Velocities[i], Velocities[j]), vec2sub(Positions[i], Positions[j]));
 					float normSquared = vec2lensqr(vec2sub(Positions[i], Positions[j]));
@@ -145,12 +165,12 @@ int main(void)
 				tot_x += powf(Velocities[i].x, 2);
 				tot_y += powf(Velocities[i].y, 2);
 				for (int j = 0; j < POPULATION_SIZE; j += 1) {
-					if (j < sqrtf(vec2lensqr(Velocities[i])) && sqrtf(vec2lensqr(Velocities[i])) < j + 1) { 
+					if (j < sqrtf(vec2lensqr(Velocities[i])) && sqrtf(vec2lensqr(Velocities[i])) < j + 1) {
 						population[(int)j/1] += 1;
 					}
 				}
 			}
-			
+
 			for (int i = 0; i < POPULATION_SIZE; i++) {
 				DrawLineEx((vec2){10 + (i*10), scrnH-10}, (vec2){10 + (i*10), (scrnH - 12 - (population[i] * 20 / log(BALLS)))}, 5, BLACK);
 				population[i] = 0;
